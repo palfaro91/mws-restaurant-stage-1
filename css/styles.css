@@ -53,6 +53,23 @@ section, div, nav{
   text-align: center;
   text-transform: uppercase;
 }
+.skip-link{
+  position: absolute;
+  top: -400px;
+  left: 0;
+  background-color: #fff;
+  z-index: 99999;
+  padding: 8px;
+  outline: none;
+}
+.skip-link:focus{
+  top: 10px;
+  box-shadow: 0px 2px 4px 6px rgba(255, 255, 255, 0.2), 0px 4px 5px 0px rgba(255, 255, 255, 0.14), 0px 1px 10px 0px rgba(255, 255, 255, 0.12);
+  left: 10px;
+}
+.whiteframe-4dp{
+  box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+}
 /* ====================== Navigation ====================== */
 nav {
   width: 100%;
@@ -136,6 +153,7 @@ nav h1 a {
   margin: 10px;
   padding: 0 10px;
   width: 200px;
+  outline:#252831;
 }
 
 /* ====================== Restaurant Listing ====================== */
@@ -145,6 +163,9 @@ nav h1 a {
   margin: 0;
   padding: 30px 15px 60px;
   text-align: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 #restaurants-list li {
   background-color: #fff;
@@ -152,10 +173,20 @@ nav h1 a {
   font-family: Arial,sans-serif;
   margin: 15px;
   min-height: 380px;
-  padding: 0 30px;
+  padding: 0 30px 25px;
   text-align: left;
-  width: 270px;
-  display: inline-block;
+  /*width: 270px;*/
+  /*display: inline-block;*/
+  display: flex;
+  flex: 1 1 33.33%;
+  max-width: calc(33.33% - 30px);
+  flex-direction: column;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
 }
 #restaurants-list .restaurant-img {
   background-color: #ccc;
@@ -180,6 +211,7 @@ a.details-link{
   margin-top: 18px;
   margin-bottom: 9px;
   text-decoration: none;
+  outline: none;
 }
 .details-link::after{
   content: '';
@@ -360,12 +392,22 @@ a.details-link{
 }
 
 /* ====================== Media Queries ====================== */
-@media screen and (min-width: 1280px){
+@media screen and (min-width: 1920px){
+  #restaurants-list li{
+    flex: 1 1 20%;
+    max-width: calc(20% - 30px);
+  }
+}
+@media screen and (min-width: 1280px) and (max-width: 1919px){
   #restaurant-address{
     font-size: 14pt;
   }
   #restaurant-hours td{
     font-size: 12pt
+  }
+  #restaurants-list li{
+    flex: 1 1 25%;
+    max-width: calc(25% - 30px);
   }
 }
 @media screen and (max-width:959px){
@@ -396,6 +438,10 @@ a.details-link{
   #restaurant-img, #restaurant-cuisine, #reviews-list li{
     width:100%;
   }
+  #restaurants-list li{
+    flex: 1 1 50%;
+    max-width: calc(50% - 30px);
+  }
 }
 
 @media screen and (max-width: 599px){
@@ -410,5 +456,9 @@ a.details-link{
   }
   nav h1{
     font-size: 18px;
+  }
+  #restaurants-list li{
+    flex: 1 1 100%;
+    max-width: 100%;
   }
 }

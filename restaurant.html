@@ -14,6 +14,9 @@
 </head>
 
 <body class="inside">
+  <a href="#restaurant-container" class="skip-link">
+    Skip to restaurant content
+  </a>
   <!-- Beginning header -->
   <header>
     <!-- Beginning nav -->
@@ -30,20 +33,20 @@
   <!-- End header -->
 
   <!-- Beginning main -->
-  <main id="maincontent" class="restaurant">
+  <main id="maincontent" class="restaurant" >
     <!-- Beginning map -->
-    <section id="map-container">
-      <div id="map"></div>
+    <section id="map-container" tabindex="-1">
+      <div id="map" tabindex="-1"></div>
     </section>
     <!-- End map -->
     <!-- Beginning restaurant -->
     <section id="restaurant-container">
       <div>
-        <h1 id="restaurant-name"></h1>
-        <img id="restaurant-img">
-        <p id="restaurant-cuisine"></p>
-        <p id="restaurant-address"></p>
-        <table id="restaurant-hours"></table>
+        <h1 id="restaurant-name" tabindex="0"></h1>
+        <img id="restaurant-img" tabindex="0">
+        <p id="restaurant-cuisine" tabindex="0"></p>
+        <p id="restaurant-address" tabindex="0"></p>
+        <table id="restaurant-hours" tabindex="0" aria-label="Restaurant hours"></table>
       </div>
     </section>
     <!-- end restaurant -->

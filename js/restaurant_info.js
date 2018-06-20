@@ -25,10 +25,11 @@ initMap = () => {
         mapboxToken: 'pk.eyJ1IjoicGFsZmFvciIsImEiOiJjamMwODZiYmkwNjFyMnFxaWpmYTRoZXh5In0.xix6-LzjLx0unmngYGcBQg',
         maxZoom: 18,
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-          '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+          '<a href="https://creativecommons.org/licenses/by-sa/2.0/" tabindex="-1">CC-BY-SA</a>, ' +
           'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         id: 'mapbox.streets'
       }).addTo(newMap);
+      document.getElementById('map').setAttribute('tabindex','-1');
       fillBreadcrumb();
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.newMap);
     }
@@ -85,13 +86,16 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
+  address.setAttribute('aria-label', `Restaurant address ${restaurant.address}`);
 
   const image = document.getElementById('restaurant-img');
-  image.className = 'restaurant-img'
+  image.className = 'restaurant-img';
+  image.setAttribute('alt', `${restaurant.name} image`);
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
+  cuisine.setAttribute('aria-label', `${restaurant.cuisine_type} cuisine`);
 
   // fill operating hours
   if (restaurant.operating_hours) {
@@ -111,10 +115,12 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 
     const day = document.createElement('td');
     day.innerHTML = key;
+    day.setAttribute('tabindex','0');
     row.appendChild(day);
 
     const time = document.createElement('td');
     time.innerHTML = operatingHours[key];
+    time.setAttribute('tabindex','0');
     row.appendChild(time);
 
     hours.appendChild(row);
@@ -131,6 +137,7 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
 
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
+  title.setAttribute('tabindex','0');
   contentContainer.appendChild(title);
 
   if (!reviews) {
@@ -159,11 +166,15 @@ createReviewHTML = (review) => {
   const name = document.createElement('span');
   name.innerHTML = review.name;
   name.classList.add('name');
+  name.setAttribute('tabindex','0');
+  name.setAttribute('aria-label',`Review by ${review.name}`);
   reviewHeader.appendChild(name);
 
   const date = document.createElement('span');
   date.innerHTML = review.date;
   date.classList.add('date');
+  date.setAttribute('tabindex','0');
+  // date.setAttribute('aria-label', `Review left on ${review.date}`);
   reviewHeader.appendChild(date);
   li.appendChild(reviewHeader);
 
@@ -173,12 +184,16 @@ createReviewHTML = (review) => {
   const rating = document.createElement('p');
   rating.innerHTML = `Rating: ${review.rating}`;
   rating.classList.add('rating');
+  // rating.setAttribute('aria-label', `Rating ${review.rating}`);
+  rating.setAttribute('tabindex','0');
   reviewContent.appendChild(rating);
 
   const comments = document.createElement('p');
   comments.innerHTML = review.comments;
   comments.classList.add('comments');
   reviewContent.appendChild(comments);
+  // comments.setAttribute('aria-label', `Review content: ${review.comments}`);
+  comments.setAttribute('tabindex','0');
   li.appendChild(reviewContent);
 
   return li;

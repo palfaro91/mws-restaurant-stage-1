@@ -1,8 +1,10 @@
 let restaurants,
   neighborhoods,
-  cuisines
-var newMap
-var markers = []
+  cuisines,
+  nSelectedIdx = 0,
+  cSelectedIdx = 0;
+var newMap;
+var markers = [];
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -36,6 +38,8 @@ fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
     const option = document.createElement('option');
     option.innerHTML = neighborhood;
     option.value = neighborhood;
+    option.setAttribute('aria-label', neighborhood);
+    option.setAttribute('aria-selected', false);
     select.append(option);
   });
 }
@@ -60,10 +64,13 @@ fetchCuisines = () => {
 fillCuisinesHTML = (cuisines = self.cuisines) => {
   const select = document.getElementById('cuisines-select');
 
-  cuisines.forEach(cuisine => {
+  cuisines.forEach((cuisine,idx) => {
+    console.log("current cuisine ", cuisine, idx);
     const option = document.createElement('option');
     option.innerHTML = cuisine;
     option.value = cuisine;
+    option.setAttribute('aria-label', cuisine);
+    option.setAttribute('aria-selected', false);
     select.append(option);
   });
 }
@@ -109,7 +116,30 @@ updateRestaurants = () => {
   const nSelect = document.getElementById('neighborhoods-select');
 
   const cIndex = cSelect.selectedIndex;
+  if (cIndex !== cSelectedIdx){
+    let cChildren = Array.prototype.slice.call(cSelect.children);
+    cChildren.forEach((node,idx) => {
+      if (idx === cIndex){
+        node.setAttribute('aria-selected', true);
+        cSelectedIdx = cIndex;
+      }else{
+        node.setAttribute('aria-selected', false);
+      }
+    });
+  }
   const nIndex = nSelect.selectedIndex;
+
+  if (nIndex !== nSelectedIdx) {
+    let nChildren = Array.prototype.slice.call(nSelect.children);
+    nChildren.forEach((node, idx) => {
+      if (idx === nIndex) {
+        node.setAttribute('aria-selected', true);
+        nSelectedIdx = nIndex;
+      } else {
+        node.setAttribute('aria-selected', false);
+      }
+    });
+  }
 
   const cuisine = cSelect[cIndex].value;
   const neighborhood = nSelect[nIndex].value;
@@ -119,7 +149,7 @@ updateRestaurants = () => {
       console.error(error);
     } else {
       resetRestaurants(restaurants);
-      fillRestaurantsHTML();
+      fillRestaurantsHTML(restaurants, neighborhood, cuisine);
     }
   })
 }
@@ -142,8 +172,16 @@ resetRestaurants = (restaurants) => {
 /**
  * Create all restaurants HTML and add them to the webpage.
  */
-fillRestaurantsHTML = (restaurants = self.restaurants) => {
+fillRestaurantsHTML = (restaurants = self.restaurants, neighborhood = 'all neighborhoods', cuisine = 'all cuisines') => {
   const ul = document.getElementById('restaurants-list');
+  const filterResults = document.getElementById('filter-results');
+
+  if (neighborhood === 'all')
+    neighborhood = 'all neighborhoods';
+  if (cuisine === 'all')
+    cuisine = 'all cuisines';
+
+  filterResults.innerHTML = `${restaurants.length} results for ${cuisine} in ${neighborhood}`;
   restaurants.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });
@@ -166,6 +204,7 @@ createRestaurantHTML = (restaurant) => {
   name.classList.add('details-link');
   name.innerHTML = restaurant.name;
   name.href = DBHelper.urlForRestaurant(restaurant);
+  name.setAttribute('aria-label', `View details about ${restaurant.name}`);
   li.append(name);
 
   const neighborhood = document.createElement('p');
@@ -207,4 +246,70 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     self.markers.push(marker);
   });
 } */
+
+/**
+ * Register service worker
+ */
+registerServiceWorker = function() {
+  if (!navigator.serviceWorker) return;
+
+  navigator.serviceWorker.register('../sw.js').then(function(reg) {
+    if (!navigator.serviceWorker.controller) {
+      return;
+    }
+
+    if (reg.waiting) {
+      updateReady(reg.waiting);
+      return;
+    }
+
+    if (reg.installing) {
+      trackInstalling(reg.installing);
+      return;
+    }
+
+    reg.addEventListener('updatefound', function() {
+      trackInstalling(reg.installing);
+    });
+  });
+
+  // Ensure refresh is only called once.
+  // This works around a bug in "force update on reload".
+  var refreshing;
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    if (refreshing) return;
+    window.location.reload();
+    refreshing = true;
+  });
+};
+
+updateReady = function(worker) {
+  var toast = this._toastsView.show("New version available", {
+    buttons: ['refresh', 'dismiss']
+  });
+
+  toast.answer.then(function(answer) {
+    if (answer != 'refresh') return;
+    worker.postMessage({action: 'skipWaiting'});
+  });
+};
+
+trackInstalling = function(worker) {
+  worker.addEventListener('statechange', function() {
+    if (worker.state == 'installed') {
+      updateReady(worker);
+    }
+  });
+};
+
+updateReady = function(worker) {
+  // var toast = this._toastsView.show("New version available", {
+  //   buttons: ['refresh', 'dismiss']
+  // });
+
+  // toast.answer.then(function(answer) {
+    // if (answer != 'refresh') return;
+    worker.postMessage({action: 'skipWaiting'});
+  // });
+};
 
