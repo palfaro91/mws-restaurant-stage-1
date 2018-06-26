@@ -10,6 +10,7 @@ var markers = [];
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
+  registerServiceWorker();
   initMap(); // added
   fetchNeighborhoods();
   fetchCuisines();
@@ -65,7 +66,6 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
   const select = document.getElementById('cuisines-select');
 
   cuisines.forEach((cuisine,idx) => {
-    console.log("current cuisine ", cuisine, idx);
     const option = document.createElement('option');
     option.innerHTML = cuisine;
     option.value = cuisine;
@@ -200,11 +200,11 @@ createRestaurantHTML = (restaurant) => {
   image.setAttribute('alt', restaurant.name);
   li.append(image);
 
-  const name = document.createElement('a');
-  name.classList.add('details-link');
+  const name = document.createElement('h3');
+  // name.classList.add('details-link');
   name.innerHTML = restaurant.name;
-  name.href = DBHelper.urlForRestaurant(restaurant);
-  name.setAttribute('aria-label', `View details about ${restaurant.name}`);
+  // name.href = DBHelper.urlForRestaurant(restaurant);
+  // name.setAttribute('aria-label', `View details about ${restaurant.name}`);
   li.append(name);
 
   const neighborhood = document.createElement('p');
@@ -215,10 +215,11 @@ createRestaurantHTML = (restaurant) => {
   address.innerHTML = restaurant.address;
   li.append(address);
 
-  // const more = document.createElement('a');
-  // more.innerHTML = 'View Details';
-  // more.href = DBHelper.urlForRestaurant(restaurant);
-  // li.append(more)
+  const more = document.createElement('a');
+  more.innerHTML = 'View Details';
+  more.href = DBHelper.urlForRestaurant(restaurant);
+  more.setAttribute('aria-label', `View details about ${restaurant.name}`);
+  li.append(more)
 
   return li
 }
@@ -236,80 +237,14 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     }
   });
 }
-/* addMarkersToMap = (restaurants = self.restaurants) => {
-  restaurants.forEach(restaurant => {
-    // Add marker to the map
-    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
-    google.maps.event.addListener(marker, 'click', () => {
-      window.location.href = marker.url
-    });
-    self.markers.push(marker);
-  });
-} */
-
 /**
  * Register service worker
  */
 registerServiceWorker = function() {
   if (!navigator.serviceWorker) return;
 
-  navigator.serviceWorker.register('../sw.js').then(function(reg) {
-    if (!navigator.serviceWorker.controller) {
-      return;
-    }
-
-    if (reg.waiting) {
-      updateReady(reg.waiting);
-      return;
-    }
-
-    if (reg.installing) {
-      trackInstalling(reg.installing);
-      return;
-    }
-
-    reg.addEventListener('updatefound', function() {
-      trackInstalling(reg.installing);
-    });
+  navigator.serviceWorker.register('../sw.js').then(reg => {
+    console.log('Service worker registered');
   });
-
-  // Ensure refresh is only called once.
-  // This works around a bug in "force update on reload".
-  var refreshing;
-  navigator.serviceWorker.addEventListener('controllerchange', function() {
-    if (refreshing) return;
-    window.location.reload();
-    refreshing = true;
-  });
-};
-
-updateReady = function(worker) {
-  var toast = this._toastsView.show("New version available", {
-    buttons: ['refresh', 'dismiss']
-  });
-
-  toast.answer.then(function(answer) {
-    if (answer != 'refresh') return;
-    worker.postMessage({action: 'skipWaiting'});
-  });
-};
-
-trackInstalling = function(worker) {
-  worker.addEventListener('statechange', function() {
-    if (worker.state == 'installed') {
-      updateReady(worker);
-    }
-  });
-};
-
-updateReady = function(worker) {
-  // var toast = this._toastsView.show("New version available", {
-  //   buttons: ['refresh', 'dismiss']
-  // });
-
-  // toast.answer.then(function(answer) {
-    // if (answer != 'refresh') return;
-    worker.postMessage({action: 'skipWaiting'});
-  // });
 };
 
