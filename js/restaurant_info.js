@@ -62,13 +62,14 @@ fetchRestaurantFromURL = (callback) => {
   }
   const id = getParameterByName('id');
   if (!id) { // no id found in URL
-    error = 'No restaurant id in URL'
+    let error = 'No restaurant id in URL';
     callback(error, null);
   } else {
     DBHelper.fetchRestaurantById(id, (error, restaurant) => {
       self.restaurant = restaurant;
       if (!restaurant) {
         console.error(error);
+        fillError(error);
         return;
       }
       fillRestaurantHTML();
@@ -76,6 +77,28 @@ fetchRestaurantFromURL = (callback) => {
     });
   }
 }
+
+/**
+ * Display error
+ */
+
+fillError = (err) => {
+  const container = document.createElement('div'),
+      errorText = document.createElement('h2'),
+      main = document.getElementById('restaurant-container'),
+      infoDiv = document.getElementById('restaurant-info'),
+      reviewsCont = document.getElementById('reviews-container');
+  container.style.height = '100%';
+  container.classList.add('layout-column');
+  container.classList.add('layout-align-center-center');
+  container.classList.add('flex');
+  main.classList.add('flex');
+  errorText.innerText = 'Restaurant not found';
+  container.append(errorText);
+  infoDiv.style.display = reviewsCont.style.display = 'none';
+  infoDiv.style.visibility = reviewsCont.style.visibility = 'hidden';
+  main.append(container);
+};
 
 /**
  * Create restaurant HTML and add it to the webpage

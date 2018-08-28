@@ -152,7 +152,7 @@ updateRestaurants = () => {
       fillRestaurantsHTML(restaurants, neighborhood, cuisine);
     }
   })
-}
+};
 
 /**
  * Clear current restaurants, their HTML and remove their map markers.
