@@ -236,15 +236,4 @@ addMarkersToMap = (restaurants = self.restaurants) => {
       window.location.href = marker.options.url;
     }
   });
-}
-/**
- * Register service worker
- */
-registerServiceWorker = function() {
-  if (!navigator.serviceWorker) return;
-
-  navigator.serviceWorker.register('../sw.js').then(reg => {
-    console.log('Service worker registered');
-  });
 };
-
