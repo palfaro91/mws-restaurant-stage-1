@@ -17,6 +17,38 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 /**
+ * Online listner to sync offline requests
+ */
+window.addEventListener('online', e => {
+  DBHelper.attemptFailedReqs().then(res =>{
+    if(res && res.synced){
+    console.log("res ",res );
+      showToast(res.message, 'success-bg');
+    }else{
+      console.log("no res s");
+    }
+  }).catch(err => {
+    console.log("something went wrong syncing! ", err);
+  })
+});
+
+/**
+ *
+ * @param message The toast message
+ * @param className Extra classes to append
+ */
+
+showToast = (message, className = "success-bg") => {
+  Toastify({
+    text: message,
+    duration: 3500,
+    gravity: 'bottom',
+    positionLeft: false,
+    className: `toasty ${className}`
+  }).showToast();
+};
+
+/**
  * Fetch all neighborhoods and set their HTML.
  */
 fetchNeighborhoods = () => {
@@ -200,29 +232,52 @@ createRestaurantHTML = (restaurant) => {
   image.setAttribute('alt', restaurant.name);
   li.append(image);
 
+  const infoContainer = document.createElement('div');
+  infoContainer.classList.add('restaurant-card-body');
+  infoContainer.classList.add('flex-auto');
+  infoContainer.classList.add('layout-column');
+  li.append(infoContainer);
   const name = document.createElement('h3');
   // name.classList.add('details-link');
   name.innerHTML = restaurant.name;
   // name.href = DBHelper.urlForRestaurant(restaurant);
   // name.setAttribute('aria-label', `View details about ${restaurant.name}`);
-  li.append(name);
+  infoContainer.append(name);
 
   const neighborhood = document.createElement('p');
   neighborhood.innerHTML = restaurant.neighborhood;
-  li.append(neighborhood);
+  infoContainer.append(neighborhood);
 
   const address = document.createElement('p');
   address.innerHTML = restaurant.address;
-  li.append(address);
+  infoContainer.append(address);
 
   const more = document.createElement('a');
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
   more.setAttribute('aria-label', `View details about ${restaurant.name}`);
-  li.append(more)
+  infoContainer.append(more);
 
+  const actions = document.createElement('div');
+  actions.classList.add('restaurant-card-actions');
+  actions.classList.add('flex-nogrow');
+  actions.classList.add('layout-row');
+  actions.classList.add('layout-align-end-end');
+
+  const likeBtn = document.createElement('button');
+  likeBtn.classList.add('button');
+  likeBtn.classList.add('like-button');
+  likeBtn.id = `restaurant-${restaurant.id}`;
+  let isFavorite = (restaurant["is_favorite"] === true || restaurant["is_favorite"] === "true");
+  if (isFavorite){
+    likeBtn.classList.add('liked')
+  }
+  likeBtn.onclick = (ev) => updateFavorite(likeBtn.id, restaurant.id, isFavorite);
+
+  actions.append(likeBtn);
+  li.append(actions);
   return li
-}
+};
 
 /**
  * Add markers for current restaurants to the map.
@@ -236,4 +291,35 @@ addMarkersToMap = (restaurants = self.restaurants) => {
       window.location.href = marker.options.url;
     }
   });
+};
+/**
+ * pass in current favorite state for error handling
+ * @param elementId
+ * @param id
+ * @param favoriteState
+ */
+updateFavorite = (elementId, id, favoriteState) => {
+  var el = document.getElementById(elementId);
+  el.disabled = true;
+  el.onclick = null;
+  DBHelper.updateFavorite(id, !favoriteState)
+  .then(data => {
+    if ('status' in (data || {}) && data.status === 'cached'){
+      showToast('Liked status will be updated when network is available');
+    }
+    if (el.classList.contains('liked')){
+      el.classList.remove('liked');
+    }else{
+      el.classList.add('liked');
+    }
+    console.log("Data ", data);
+    el.disabled = false;
+    el.onclick = (ev) => updateFavorite(elementId, id, !favoriteState);
+  })
+  .catch(err => {
+    console.log("err " ,err);
+    el.onclick = (ev) => updateFavorite(elementId, id, favoriteState);
+    el.disabled = false;
+  });
+  console.log("id ", id , favoriteState);
 };
